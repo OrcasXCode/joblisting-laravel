@@ -20,6 +20,13 @@ Route::get('/about', function () {
     return view('about');
 });
 
+
+Route::get('/jobs/create',function(){
+    return view('jobs.create');
+});
+
+
+
 Route::get('jobs/{id}', function ($id) {
     $job = Job::find($id);
 
@@ -27,9 +34,27 @@ Route::get('jobs/{id}', function ($id) {
         abort(404);
     }
 
-    return view('job', ['job' => $job]);
+    return view('jobs.show', ['job' => $job]);
+});
+
+Route::post('/jobs', function () {
+    // dd("Hello from the post route");
+    request()->validate([
+        'title' => ['required', 'min:3'],
+        'salary' => ['required','min:3']
+    ]);
+    Job::create([
+        'title' => request('title'),
+        'salary' => request('salary'),
+        'employer_id' => 1
+    ]);
+    return redirect('/jobs');
 });
 
 Route::get('/jobs', function () {
-    return view('jobs', ['jobs' => Job::all()]);
+    //Eager Loading : Minimize the number of SQL queries
+    // return view('jobs', ['jobs' => Job::with('employer')->get()]);
+    return view('jobs.index', ['jobs' => Job::with('employer')->paginate(3)]);
+    // return view('jobs', ['jobs' => Job::all()]);
 });
+
