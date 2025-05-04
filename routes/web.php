@@ -1,60 +1,40 @@
 <?php
 
-
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\RegisteredUserController;
+use App\Http\Controllers\SessionController;
+use App\Jobs\TranslateJob;
 use App\Models\Job;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    $jobs = Job::all();
-    
-    dd($jobs[0]->title);
-    
-    // return view('home');
+Route::get('test', function () {
+    $job = Job::first();
+
+    TranslateJob::dispatch($job);
+
+    return 'Done';
 });
 
-// Route::get('/', function () {
-//     return view('home');
-// });
+Route::view('/', 'home');
+Route::view('/about', 'about');
 
-Route::get('/about', function () {
-    return view('about');
-});
+ Route::get('/jobs', [JobController::class, 'index']);
+ Route::get('/jobs/create', [JobController::class, 'create']);
+ Route::post('/jobs', [JobController::class, 'store'])->middleware('auth');
+ Route::get('/jobs/{job}', [JobController::class, 'show']);
 
+ Route::get('/jobs/{job}/edit', [JobController::class, 'edit'])
+     ->middleware('auth')
+     ->can('edit', 'job');
 
-Route::get('/jobs/create',function(){
-    return view('jobs.create');
-});
+ Route::patch('/jobs/{job}', [JobController::class, 'update']);
+ Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
 
+// Auth
+Route::get('/register', [RegisteredUserController::class, 'create']);
+Route::post('/register', [RegisteredUserController::class, 'store']);
 
-
-Route::get('jobs/{id}', function ($id) {
-    $job = Job::find($id);
-
-    if (!$job) {
-        abort(404);
-    }
-
-    return view('jobs.show', ['job' => $job]);
-});
-
-Route::post('/jobs', function () {
-    // dd("Hello from the post route");
-    request()->validate([
-        'title' => ['required', 'min:3'],
-        'salary' => ['required','min:3']
-    ]);
-    Job::create([
-        'title' => request('title'),
-        'salary' => request('salary'),
-        'employer_id' => 1
-    ]);
-    return redirect('/jobs');
-});
-
-Route::get('/jobs', function () {
-    //Eager Loading : Minimize the number of SQL queries
-    // return view('jobs', ['jobs' => Job::with('employer')->get()]);
-    return view('jobs.index', ['jobs' => Job::with('employer')->paginate(3)]);
-    // return view('jobs', ['jobs' => Job::all()]);
-});
+Route::get('/login', [SessionController::class, 'create'])->name('login');
+Route::post('/login', [SessionController::class, 'store']);
+Route::post('/logout', [SessionController::class, 'destroy']);
 

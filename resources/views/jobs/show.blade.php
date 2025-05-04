@@ -1,15 +1,17 @@
 <x-layout>
-    <x-slot name="heading">
-        {{ $job['title'] }}
-    </x-slot>
+    <x-slot:heading>
+        Job
+    </x-slot:heading>
 
-    <div class="max-w-2xl">
-        <div class="mb-4">
-            <h2 class="text-lg font-bold mb-2">Salary: {{ $job['salary'] }} per year</h2>
-        </div>
-        
-        <div class="mt-4">
-            <a href="/jobs" class="text-blue-500 hover:underline">&larr; Back to All Jobs</a>
-        </div>
-    </div>
+    <h2 class="font-bold text-lg">{{ $job->title }}</h2>
+
+    <p>
+        This job pays {{ $job->salary }} per year.
+    </p>
+
+  
+    <p class="mt-6">
+        <x-button href="/jobs/{{ $job->id }}/edit">Edit Job</x-button>
+    </p>
+
 </x-layout>
